@@ -44,7 +44,6 @@ pub fn create_ics(
         // Create daily calendar events for the week and preface the text with either strength or
         // yoga, depending on the activity type
         for activity in weekly_activities.next_week_activities(week_type) {
-            println!("{:?}", activity);
             if let activities::ActivityType::Yoga(yoga_name) = activity {
                 calendar.push(
                     Event::new()
