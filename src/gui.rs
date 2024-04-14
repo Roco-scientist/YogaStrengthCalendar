@@ -196,7 +196,8 @@ impl eframe::App for StrengthYogaApp {
                     self.total_weeks,
                     recovery_weeks,
                     self.weekly_activities,
-                ).unwrap();
+                )
+                .unwrap();
             };
 
             #[cfg(target_arch = "wasm32")]

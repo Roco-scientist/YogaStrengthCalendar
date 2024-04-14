@@ -837,7 +837,10 @@ pub fn strength_added_info(strength_name: &str) -> Result<String> {
     if let Some(added_info) = STRENGTH_HASH.get(strength_name) {
         Ok(added_info.to_string())
     } else {
-        bail!("Strength activity not in hashmap. Activity: {:?}", strength_name)
+        bail!(
+            "Strength activity not in hashmap. Activity: {:?}",
+            strength_name
+        )
     }
 }
 
