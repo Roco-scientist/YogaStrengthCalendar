@@ -1,4 +1,7 @@
-use std::fmt;
+use lazy_static::lazy_static;
+use std::{collections::HashMap, fmt};
+
+use anyhow::{bail, Result};
 
 /// Holder for yoga and strength file names
 #[derive(Copy, Clone, Debug)]
@@ -32,7 +35,7 @@ impl fmt::Display for YogaLevel {
 
 impl YogaLevel {
     // Advances yoga one level.  If it is not set or at max, then the level is not advanced.
-    pub fn advance(&mut self) -> () {
+    pub fn advance(&mut self) {
         *self = match *self {
             YogaLevel::NotSet => YogaLevel::NotSet,
             YogaLevel::Beginer => YogaLevel::Intermediate,
@@ -487,7 +490,7 @@ impl fmt::Display for StrengthLevel {
 impl StrengthLevel {
     // Advances the strength level by one.  If strength level is not selected or if it is at max,
     // it does not advance.
-    pub fn advance(&mut self) -> () {
+    pub fn advance(&mut self) {
         *self = match *self {
             StrengthLevel::NotSet => StrengthLevel::NotSet,
             StrengthLevel::Strength1 => StrengthLevel::Strength2,
@@ -791,38 +794,56 @@ impl StrengthLevel {
     }
 }
 
-// STRENGTH_ANNOTATION = {
-//     "Core Focus 01": "",
-//     "Core Focus 02": "",
-//     "Core Focus 03": "",
-//     "Core Focus 04": "Exercise band",
-//     "Full Body 01": "Empty drink bottle",
-//     "Full Body 02": "Empty drink bottle",
-//     "Full Body 05": "Filled drink bottle",
-//     "Full Body 06": "2 Filled drink bottles",
-//     "Full Body 07": "2 Filled drink bottles",
-//     "Full Body 08": "2 Filled drink bottles",
-//     "Full Body 09": "2 Filled drink bottles",
-//     "Full Body 10": "2 Filled drink bottles",
-//     "Full Body 11": "2 Filled drink bottles",
-//     "Full Body 12": "2 Filled drink bottles",
-//     "Full Body 13": "2 Filled drink bottles",
-//     "Full Body 15": "2 Filled drink bottles",
-//     "Full Body 16": "2 Filled drink bottles",
-//     "Full Body 17": "2 Filled drink bottles",
-//     "Lower Body Focus 01": "Chair",
-//     "Lower Body Focus 02": "Chair",
-//     "Lower Body Focus 03": "Filled drink bottle",
-//     "Lower Body Focus 04": "Chair, drink bottle, exercise band",
-//     "Posterior Chain Focus 01": "",
-//     "Posterior Chain Focus 02": "",
-//     "Posterior Chain Focus 03": "Stick, filled drink bottle",
-//     "Posterior Chain Focus 04": "Exercise band, filled drink bottle",
-//     "Posterior Chain Focus 05": "Exercise band",
-//     "Recovery Session A": "Empty drink bottle",
-//     "Recovery Session B": "",
-// }
-//
+lazy_static! {
+    static ref STRENGTH_HASH: HashMap<&'static str, &'static str> = HashMap::from([
+        ("Core Focus 01", ""),
+        ("Core Focus 02", ""),
+        ("Core Focus 03", ""),
+        ("Core Focus 04", "Exercise band"),
+        ("Full Body 01", "Empty drink bottle"),
+        ("Full Body 02", "Empty drink bottle"),
+        ("Full Body 03", "Empty drink bottle"),
+        ("Full Body 04", "2 semi-filled drink bottles"),
+        ("Full Body 05", "Filled drink bottle"),
+        ("Full Body 06", "2 Filled drink bottles"),
+        ("Full Body 07", "2 Filled drink bottles"),
+        ("Full Body 08", "2 Filled drink bottles"),
+        ("Full Body 09", "2 Filled drink bottles"),
+        ("Full Body 10", "2 Filled drink bottles"),
+        ("Full Body 11", "2 Filled drink bottles"),
+        ("Full Body 12", "2 Filled drink bottles"),
+        ("Full Body 13", "2 Filled drink bottles"),
+        ("Full Body 15", "2 Filled drink bottles"),
+        ("Full Body 16", "2 Filled drink bottles"),
+        ("Full Body 17", "2 Filled drink bottles"),
+        ("Lower Body Focus 01", "Chair"),
+        ("Lower Body Focus 02", "Chair"),
+        ("Lower Body Focus 03", "Filled drink bottle"),
+        ("Lower Body Focus 04", "Chair, drink bottle, exercise band"),
+        ("Posterior Chain Focus 01", ""),
+        ("Posterior Chain Focus 02", ""),
+        ("Posterior Chain Focus 03", "Stick, filled drink bottle"),
+        (
+            "Posterior Chain Focus 04",
+            "Exercise band, filled drink bottle"
+        ),
+        ("Posterior Chain Focus 05", "Exercise band"),
+        ("Recovery Session A", "Empty drink bottle"),
+        ("Recovery Session B", ""),
+    ]);
+}
+
+pub fn strength_added_info(strength_name: &str) -> Result<String> {
+    if let Some(added_info) = STRENGTH_HASH.get(strength_name) {
+        Ok(added_info.to_string())
+    } else {
+        bail!(
+            "Strength activity not in hashmap. Activity: {:?}",
+            strength_name
+        )
+    }
+}
+
 pub enum WeekType {
     Active,
     Recovery,
@@ -891,7 +912,7 @@ impl WeeklyActivities {
 
     // Updates yoga and strength activities based on the level selected.  This is not automaticcaly
     // set, so it needs to be called.
-    pub fn update_activities(&mut self) -> () {
+    pub fn update_activities(&mut self) {
         self.yoga_activities = self.yoga_level.activities();
         self.yoga_recovery = self.yoga_level.recovery();
         self.strength_activities = self.strength_level.activities();
@@ -923,7 +944,7 @@ impl WeeklyActivities {
     // Advances the week chosen index by one and if it is at the end of the 9 week cycle, resets
     // back to 0.  If either yoga or strength are set to progress, also progresses these and
     // updates the activities
-    fn advance_week_index(&mut self) -> () {
+    fn advance_week_index(&mut self) {
         self.week_index += 1;
         if self.week_index == 9 {
             self.week_index = 0;
@@ -940,7 +961,7 @@ impl WeeklyActivities {
     }
 
     // Advances the recovery week index by one and resets at the end of the 3 week recovery cycle
-    fn advance_recovery_index(&mut self) -> () {
+    fn advance_recovery_index(&mut self) {
         self.recovery_index += 1;
         if self.recovery_index == 3 {
             self.recovery_index = 0;
@@ -961,7 +982,7 @@ impl WeeklyActivities {
                     weeks_activities.push(strength_week[strength_index]);
                     strength_index += 1;
                 }
-                _ => weeks_activities.push(activity.clone()),
+                _ => weeks_activities.push(*activity),
             }
         }
         weeks_activities
