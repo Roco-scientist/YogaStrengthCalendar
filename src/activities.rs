@@ -802,6 +802,8 @@ lazy_static! {
         ("Core Focus 04", "Exercise band"),
         ("Full Body 01", "Empty drink bottle"),
         ("Full Body 02", "Empty drink bottle"),
+        ("Full Body 03", "Empty drink bottle"),
+        ("Full Body 04", "2 semi-filled drink bottles"),
         ("Full Body 05", "Filled drink bottle"),
         ("Full Body 06", "2 Filled drink bottles"),
         ("Full Body 07", "2 Filled drink bottles"),
@@ -831,19 +833,11 @@ lazy_static! {
     ]);
 }
 
-fn strength_added_info(strength: ActivityType) -> Result<String> {
-    match strength {
-        ActivityType::Strength(strength_text) => {
-            if let Some(added_info) = STRENGTH_HASH.get(strength_text) {
-                Ok(added_info.to_string())
-            } else {
-                bail!("Strength activity not in hashmap. Activity: {:?}", strength)
-            }
-        }
-        _ => bail!(
-            "Sent a non-strength activity to strength function.  Activity: {:?}",
-            strength
-        ),
+pub fn strength_added_info(strength_name: &str) -> Result<String> {
+    if let Some(added_info) = STRENGTH_HASH.get(strength_name) {
+        Ok(added_info.to_string())
+    } else {
+        bail!("Strength activity not in hashmap. Activity: {:?}", strength_name)
     }
 }
 

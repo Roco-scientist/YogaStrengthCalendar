@@ -51,10 +51,12 @@ pub fn create_ics(
                         .done(),
                 );
             } else if let activities::ActivityType::Strength(strength_name) = activity {
+                let strength_added_info = activities::strength_added_info(strength_name)?;
                 calendar.push(
                     Event::new()
                         .all_day(current_date)
                         .summary(&format!("Strength: {}", strength_name))
+                        .description(&strength_added_info)
                         .done(),
                 );
             }
@@ -65,6 +67,7 @@ pub fn create_ics(
         current_date = monday(current_date, MondayType::Next);
     }
 
+    println!("To save 5");
     let calendar_text = format!("{}", calendar);
 
     #[cfg(not(target_arch = "wasm32"))]
@@ -75,6 +78,7 @@ pub fn create_ics(
 
 #[cfg(not(target_arch = "wasm32"))]
 fn save_ics(calendar_text: String) -> Result<()> {
+    println!("In save");
     if let Some(path) = rfd::FileDialog::new()
         .set_file_name("workout.ics")
         .save_file()

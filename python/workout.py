@@ -145,6 +145,8 @@ STRENGTH_ANNOTATION = {
         "Core Focus 04": "Exercise band",
         "Full Body 01": "Empty drink bottle",
         "Full Body 02": "Empty drink bottle",
+        "Full Body 03": "Empty drink bottle",
+        "Full Body 04": "2 semi-filled drink bottles",
         "Full Body 05": "Filled drink bottle",
         "Full Body 06": "2 Filled drink bottles",
         "Full Body 07": "2 Filled drink bottles",
