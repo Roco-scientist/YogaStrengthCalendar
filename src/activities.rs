@@ -1,5 +1,6 @@
 use std::fmt;
 
+/// Holder for yoga and strength file names
 #[derive(Copy, Clone, Debug)]
 pub enum ActivityType {
     Yoga(&'static str),
@@ -8,9 +9,10 @@ pub enum ActivityType {
     Skip,
 }
 
+/// Level for Yoga. Selected throughout the app to set video selection.
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum YogaLevel {
-    NotSet,
+    NotSet, // Defeault level before setting
     Beginer,
     Intermediate,
     Advanced,
@@ -29,14 +31,7 @@ impl fmt::Display for YogaLevel {
 }
 
 impl YogaLevel {
-    pub fn list() -> [String; 3] {
-        [
-            "Beginer".to_string(),
-            "Intermediate".to_string(),
-            "Advanced".to_string(),
-        ]
-    }
-
+    // Advances yoga one level.  If it is not set or at max, then the level is not advanced.
     pub fn advance(&mut self) -> () {
         *self = match *self {
             YogaLevel::NotSet => YogaLevel::NotSet,
@@ -45,6 +40,11 @@ impl YogaLevel {
             YogaLevel::Advanced => YogaLevel::Advanced,
         }
     }
+
+    // Weekly activities.  These form the scheduling later on and is on a 6 days per week schedule.
+    // When there is a skip, that day is skipped and when there is a StrenthEmpty, it is replaced
+    // with a strength activity later in the app.  NotSet using a schedule where all Yoga days are
+    // skipped. This works on a 9 week cycle.
     pub fn activities(&self) -> [[ActivityType; 6]; 9] {
         match *self {
             YogaLevel::NotSet => [
@@ -345,6 +345,11 @@ impl YogaLevel {
             ],
         }
     }
+
+    // Weekly recovery activities.  These form the scheduling later on and is on a 6 days per week schedule.
+    // When there is a skip, that day is skipped and when there is a StrenthEmpty, it is replaced
+    // with a strength recovery activity later in the app.  NotSet si using a schedule where all Yoga days are
+    // skipped. This works on a 3 week cycle.
     pub fn recovery(&self) -> [[ActivityType; 6]; 3] {
         match *self {
             YogaLevel::NotSet => [
@@ -457,7 +462,7 @@ impl YogaLevel {
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum StrengthLevel {
-    NotSet,
+    NotSet, // Default setting before a level is selected
     Strength1,
     Strength2,
     Strength3,
@@ -480,6 +485,8 @@ impl fmt::Display for StrengthLevel {
 }
 
 impl StrengthLevel {
+    // Advances the strength level by one.  If strength level is not selected or if it is at max,
+    // it does not advance.
     pub fn advance(&mut self) -> () {
         *self = match *self {
             StrengthLevel::NotSet => StrengthLevel::NotSet,
@@ -491,6 +498,9 @@ impl StrengthLevel {
         }
     }
 
+    // Weekly strenth activities.  These replace the StrengthEmpty from the Yoga schedule.  
+    // NotSet si using a schedule where all Strength days are skipped. This works on a 9 week cycle 
+    // with 2 strength activities per week.
     pub fn activities(&self) -> [[ActivityType; 2]; 9] {
         match *self {
             StrengthLevel::NotSet => [
@@ -696,6 +706,10 @@ impl StrengthLevel {
             ],
         }
     }
+
+    // Weekly strenth recovery activities.  These replace the StrengthEmpty from the Yoga recovery schedule.  
+    // NotSet si using a schedule where all Strength days are skipped. This works on a 3 week cycle 
+    // with 2 strength activities per week.
     pub fn recovery(&self) -> [[ActivityType; 2]; 3] {
         match *self {
             StrengthLevel::NotSet => [
@@ -814,17 +828,19 @@ pub enum WeekType {
     Recovery,
 }
 
+/// The main holder of information used to create the icalendar.  This struct is used and changed by
+/// the GUI.
 #[derive(Copy, Clone)]
 pub struct WeeklyActivities {
     pub yoga_level: YogaLevel,
-    pub progress_yoga: bool,
+    pub progress_yoga: bool, // whether or not to progress the yoga level after completing the 9 week cycle
     pub strength_level: StrengthLevel,
-    pub progress_strength: bool,
+    pub progress_strength: bool, // same progress but for strength
     yoga_activities: [[ActivityType; 6]; 9],
     yoga_recovery: [[ActivityType; 6]; 3],
     strength_activities: [[ActivityType; 2]; 9],
     strength_recovery: [[ActivityType; 2]; 3],
-    week_index: usize,
+    week_index: usize, // an index which is advanced for every week
     recovery_index: usize,
 }
 
@@ -846,10 +862,13 @@ impl Default for WeeklyActivities {
 }
 
 impl WeeklyActivities {
+    // Test to see if the 9 week cycle is at the begining. Used to create a calendar event which
+    // states the begining of a new cycle
     pub fn begining(self) -> bool {
         self.week_index == 0
     }
 
+    // Used with above to create the text for the new 9 week cycle event
     pub fn begining_description(self) -> String {
         let yoga_text = match self.yoga_level {
             YogaLevel::NotSet => "",
@@ -870,6 +889,8 @@ impl WeeklyActivities {
         format!("Starting: {}{}", yoga_text, strength_text)
     }
 
+    // Updates yoga and strength activities based on the level selected.  This is not automaticcaly
+    // set, so it needs to be called.
     pub fn update_activities(&mut self) -> () {
         self.yoga_activities = self.yoga_level.activities();
         self.yoga_recovery = self.yoga_level.recovery();
@@ -877,6 +898,7 @@ impl WeeklyActivities {
         self.strength_recovery = self.strength_level.recovery();
     }
 
+    // Creates a 6 day week of activities combining yoga and strength
     pub fn next_week_activities(&mut self, week_type: WeekType) -> Vec<ActivityType> {
         let week_activities;
         match week_type {
@@ -898,6 +920,9 @@ impl WeeklyActivities {
         week_activities
     }
 
+    // Advances the week chosen index by one and if it is at the end of the 9 week cycle, resets
+    // back to 0.  If either yoga or strength are set to progress, also progresses these and
+    // updates the activities
     fn advance_week_index(&mut self) -> () {
         self.week_index += 1;
         if self.week_index == 9 {
@@ -914,6 +939,7 @@ impl WeeklyActivities {
         }
     }
 
+    // Advances the recovery week index by one and resets at the end of the 3 week recovery cycle
     fn advance_recovery_index(&mut self) -> () {
         self.recovery_index += 1;
         if self.recovery_index == 3 {
@@ -921,6 +947,7 @@ impl WeeklyActivities {
         }
     }
 
+    // combines the yoga and strength activities into a 6 day routing for the week.
     fn combine_activities(
         self,
         yoga_week: &[ActivityType; 6],

@@ -16,19 +16,21 @@ impl Default for StrengthYogaApp {
     fn default() -> Self {
         Self {
             weekly_activities: activities::WeeklyActivities::default(),
-            total_weeks: 12,
-            start_date: Local::now().date_naive(),
-            recovery_weeks_bools: std::iter::repeat(false).take(120).collect::<Vec<bool>>(),
-            recovery_weeks: calendar::recovery_days(Local::now().date_naive(), 120),
+            total_weeks: 12, // total number of weeks to create a schedule for
+            start_date: Local::now().date_naive(), // when the workout schedule starts
+            recovery_weeks_bools: std::iter::repeat(false).take(120).collect::<Vec<bool>>(), // list of bools for changing workout week selection
+            recovery_weeks: calendar::recovery_days(Local::now().date_naive(), 120), // list of mondays for workout weeks
         }
     }
 }
 
 impl StrengthYogaApp {
+    // Changes all recovery_weeks_bools back to false
     pub fn reset_recovery_bool(&mut self) -> () {
         self.recovery_weeks_bools = std::iter::repeat(false).take(120).collect::<Vec<bool>>()
     }
 
+    // Function used to set every 3rd or 4th reovery week bool to true
     pub fn set_recovery_bool_repeat(&mut self, step: usize) -> () {
         self.reset_recovery_bool();
         for x in self
@@ -47,15 +49,17 @@ impl StrengthYogaApp {
 }
 
 impl eframe::App for StrengthYogaApp {
+    // The GUI
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
+
+            // Yoga level area
             ui.label("Yoga Level:");
             ui.add_space(5.);
             ui.horizontal(|ui| {
-                egui::ComboBox::from_id_source("Yoga") // When created from a label the text will b shown on the side of the combobox
-                    .selected_text(self.weekly_activities.yoga_level.to_string()) // This is the currently selected option (in text form)
+                egui::ComboBox::from_id_source("Yoga") 
+                    .selected_text(self.weekly_activities.yoga_level.to_string()) 
                     .show_ui(ui, |ui| {
-                        // In this closure the various options can be added
                         for yoga_level in [
                             activities::YogaLevel::NotSet,
                             activities::YogaLevel::Beginer,
@@ -77,15 +81,14 @@ impl eframe::App for StrengthYogaApp {
             ui.add_space(10.);
             ui.separator();
 
+            // Strength level area
             ui.add_space(10.);
             ui.label("Strength Level:");
             ui.add_space(5.);
-
             ui.horizontal(|ui| {
-                egui::ComboBox::from_id_source("Strength") // When created from a label the text will b shown on the side of the combobox
-                    .selected_text(self.weekly_activities.strength_level.to_string()) // This is the currently selected option (in text form)
+                egui::ComboBox::from_id_source("Strength") 
+                    .selected_text(self.weekly_activities.strength_level.to_string()) 
                     .show_ui(ui, |ui| {
-                        // In this closure the various options can be added
                         for strength_level in [
                             activities::StrengthLevel::NotSet,
                             activities::StrengthLevel::Strength1,
@@ -109,24 +112,24 @@ impl eframe::App for StrengthYogaApp {
             ui.add_space(10.);
             ui.separator();
 
+            // Total weeks selection
             ui.add_space(10.);
-
             ui.label("Total Weeks:");
             ui.add_space(5.);
-            ui.add(egui::Slider::new(&mut self.total_weeks, 1..=52));
+            ui.add(egui::Slider::new(&mut self.total_weeks, 1..=52)); // set to max of 52 weeks
             ui.add_space(10.);
             ui.separator();
 
+            // Start date selection
             ui.add_space(10.);
-
             ui.label("Start Date:");
             ui.add_space(5.);
             ui.add(DatePickerButton::new(&mut self.start_date));
             ui.add_space(10.);
             ui.separator();
 
+            // Recovery weeks selection
             ui.add_space(10.);
-
             ui.horizontal(|ui| {
                 ui.label("Recovery Weeks:");
                 if ui.button("3:1").clicked() {
@@ -139,9 +142,7 @@ impl eframe::App for StrengthYogaApp {
                     self.reset_recovery_bool()
                 }
             });
-
             ui.add_space(5.);
-
             ui.vertical(|ui| {
                 let last_monday = calendar::last_monday(self.start_date, self.total_weeks);
                 let monday_start = calendar::monday_start(self.start_date);
@@ -149,13 +150,16 @@ impl eframe::App for StrengthYogaApp {
                     .recovery_weeks
                     .iter()
                     .enumerate()
-                    .filter(|(_, d)| d >= &&monday_start)
-                    .map(|(x, _)| x)
-                    .take(self.total_weeks as usize)
-                    .step_by(4)
+                    .filter(|(_, d)| d >= &&monday_start) // Only include Mondays after the Start Date
+                    .map(|(x, _)| x) // Keep only the indexes
+                    .take(self.total_weeks as usize) // Take as many as there are weeks
+                    .step_by(4) // Take every 4th to create 4 columns later
                 {
                     ui.horizontal(|ui| {
+                        // Create 4 columns for the dates
                         for y in 0..4 {
+                            // Only do so if it is within the range of the recovery weeks and stop
+                            // when the last monday is reached
                             if (x + y) < self.recovery_weeks.len()
                                 && self.recovery_weeks[x + y] < last_monday
                             {
@@ -171,13 +175,16 @@ impl eframe::App for StrengthYogaApp {
             ui.add_space(10.);
             ui.separator();
 
+            // Save icalendar area
             ui.add_space(10.);
             if ui.button("Save").clicked() {
-                self.weekly_activities.update_activities();
+                self.weekly_activities.update_activities(); // Update the yoga and strength activities as this has not been done yet
+                // Pick the save file then save the icalendar
                 if let Some(path) = rfd::FileDialog::new()
                     .set_file_name("workout.ics")
                     .save_file()
                 {
+                    // Create a recovery weeks vec to feed into the create_ics function
                     let recovery_weeks = self
                         .recovery_weeks
                         .iter()
