@@ -107,6 +107,8 @@ impl eframe::App for StrengthYogaApp {
 
             ui.add_space(16.);
 
+            ui.label("Start date:");
+            ui.add_space(6.);
             ui.add(DatePickerButton::new(&mut self.start_date));
 
             ui.add_space(16.);
