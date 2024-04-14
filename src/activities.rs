@@ -35,7 +35,7 @@ impl fmt::Display for YogaLevel {
 
 impl YogaLevel {
     // Advances yoga one level.  If it is not set or at max, then the level is not advanced.
-    pub fn advance(&mut self) -> () {
+    pub fn advance(&mut self) {
         *self = match *self {
             YogaLevel::NotSet => YogaLevel::NotSet,
             YogaLevel::Beginer => YogaLevel::Intermediate,
@@ -490,7 +490,7 @@ impl fmt::Display for StrengthLevel {
 impl StrengthLevel {
     // Advances the strength level by one.  If strength level is not selected or if it is at max,
     // it does not advance.
-    pub fn advance(&mut self) -> () {
+    pub fn advance(&mut self) {
         *self = match *self {
             StrengthLevel::NotSet => StrengthLevel::NotSet,
             StrengthLevel::Strength1 => StrengthLevel::Strength2,
@@ -912,7 +912,7 @@ impl WeeklyActivities {
 
     // Updates yoga and strength activities based on the level selected.  This is not automaticcaly
     // set, so it needs to be called.
-    pub fn update_activities(&mut self) -> () {
+    pub fn update_activities(&mut self) {
         self.yoga_activities = self.yoga_level.activities();
         self.yoga_recovery = self.yoga_level.recovery();
         self.strength_activities = self.strength_level.activities();
@@ -944,7 +944,7 @@ impl WeeklyActivities {
     // Advances the week chosen index by one and if it is at the end of the 9 week cycle, resets
     // back to 0.  If either yoga or strength are set to progress, also progresses these and
     // updates the activities
-    fn advance_week_index(&mut self) -> () {
+    fn advance_week_index(&mut self) {
         self.week_index += 1;
         if self.week_index == 9 {
             self.week_index = 0;
@@ -961,7 +961,7 @@ impl WeeklyActivities {
     }
 
     // Advances the recovery week index by one and resets at the end of the 3 week recovery cycle
-    fn advance_recovery_index(&mut self) -> () {
+    fn advance_recovery_index(&mut self) {
         self.recovery_index += 1;
         if self.recovery_index == 3 {
             self.recovery_index = 0;
@@ -982,7 +982,7 @@ impl WeeklyActivities {
                     weeks_activities.push(strength_week[strength_index]);
                     strength_index += 1;
                 }
-                _ => weeks_activities.push(activity.clone()),
+                _ => weeks_activities.push(*activity),
             }
         }
         weeks_activities

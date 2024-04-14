@@ -10,6 +10,8 @@ pub struct StrengthYogaApp {
     start_date: NaiveDate,
     recovery_weeks_bools: Vec<bool>,
     recovery_weeks: Vec<NaiveDate>,
+
+    #[cfg(target_arch = "wasm32")]
     calendar_string: String,
 }
 
@@ -21,6 +23,8 @@ impl Default for StrengthYogaApp {
             start_date: Local::now().date_naive(), // when the workout schedule starts
             recovery_weeks_bools: std::iter::repeat(false).take(120).collect::<Vec<bool>>(), // list of bools for changing workout week selection
             recovery_weeks: calendar::recovery_days(Local::now().date_naive(), 120), // list of mondays for workout weeks
+
+            #[cfg(target_arch = "wasm32")]
             calendar_string: String::default(),
         }
     }
@@ -28,12 +32,12 @@ impl Default for StrengthYogaApp {
 
 impl StrengthYogaApp {
     // Changes all recovery_weeks_bools back to false
-    pub fn reset_recovery_bool(&mut self) -> () {
+    pub fn reset_recovery_bool(&mut self) {
         self.recovery_weeks_bools = std::iter::repeat(false).take(120).collect::<Vec<bool>>()
     }
 
     // Function used to set every 3rd or 4th reovery week bool to true
-    pub fn set_recovery_bool_repeat(&mut self, step: usize) -> () {
+    pub fn set_recovery_bool_repeat(&mut self, step: usize) {
         self.reset_recovery_bool();
         for x in self
             .recovery_weeks
@@ -52,7 +56,7 @@ impl StrengthYogaApp {
 
 impl eframe::App for StrengthYogaApp {
     // The GUI
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) -> () {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             // Yoga level area
             ui.label("Yoga Level:");

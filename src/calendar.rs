@@ -2,6 +2,8 @@ use crate::activities;
 use anyhow::Result;
 use chrono::{Datelike, Duration, NaiveDate, Weekday};
 use icalendar::{Calendar, Component, Event, EventLike};
+
+#[cfg(not(target_arch = "wasm32"))]
 use std::fs;
 
 /// Creates and saves the icalendar file with the input choices from the GUI
@@ -33,12 +35,11 @@ pub fn create_ics(
 
         // Set as either recovery or active week, depending on what weeks were selected for
         // recovery
-        let week_type;
-        if recovery_weeks.contains(&current_date) {
-            week_type = activities::WeekType::Recovery;
+        let week_type = if recovery_weeks.contains(&current_date) {
+            activities::WeekType::Recovery
         } else {
-            week_type = activities::WeekType::Active;
-        }
+            activities::WeekType::Active
+        };
 
         // Create daily calendar events for the week and preface the text with either strength or
         // yoga, depending on the activity type
@@ -126,10 +127,10 @@ pub fn last_monday(start: NaiveDate, weeks: u32) -> NaiveDate {
 // Creates a list of all Mondays which can be chosen for recovery weeks within the GUI
 pub fn recovery_days(start: NaiveDate, weeks: u32) -> Vec<NaiveDate> {
     let mut first_day_of_week = monday(start, MondayType::Previous);
-    let mut recovery_weeks = vec![first_day_of_week.clone()];
+    let mut recovery_weeks = vec![first_day_of_week];
     for _ in 0..(weeks - 1) {
         first_day_of_week += Duration::days(7);
-        recovery_weeks.push(first_day_of_week.clone());
+        recovery_weeks.push(first_day_of_week);
     }
     recovery_weeks
 }

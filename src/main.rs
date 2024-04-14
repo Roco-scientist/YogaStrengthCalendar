@@ -4,7 +4,7 @@
 #[cfg(not(target_arch = "wasm32"))]
 use eframe::egui;
 
-use YogaStrengthCalendar::gui;
+use YogaStrengthCalendar::gui::StrengthYogaApp;
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {
@@ -22,7 +22,7 @@ fn main() {
     let _ = eframe::run_native(
         "Yoga and strength for cycling",
         native_options,
-        Box::new(|_cc| Box::new(gui::StrengthYogaApp::default())),
+        Box::new(|_cc| Box::<StrengthYogaApp>::default()),
     );
 }
 
@@ -39,7 +39,7 @@ fn main() {
             .start(
                 "the_canvas_id", // hardcode it
                 web_options,
-                Box::new(|_cc| Box::new(gui::StrengthYogaApp::default())),
+                Box::new(|_cc| Box::<StrengthYogaApp>::default()),
             )
             .await
             .expect("failed to start eframe");
