@@ -8,5 +8,8 @@ Rust or pyton installation needed.  For the python versions `./python`,
 with workout.tk.py being the GUI version.  For Rust, compile with `cargo build --release`
 
 ## Use
-Rust:
+### Rust  
+`./target/release/YogaStrengthCalendar`  
+  
+
 ![App picture](./app.png)
