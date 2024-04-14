@@ -498,8 +498,8 @@ impl StrengthLevel {
         }
     }
 
-    // Weekly strenth activities.  These replace the StrengthEmpty from the Yoga schedule.  
-    // NotSet si using a schedule where all Strength days are skipped. This works on a 9 week cycle 
+    // Weekly strenth activities.  These replace the StrengthEmpty from the Yoga schedule.
+    // NotSet si using a schedule where all Strength days are skipped. This works on a 9 week cycle
     // with 2 strength activities per week.
     pub fn activities(&self) -> [[ActivityType; 2]; 9] {
         match *self {
@@ -707,8 +707,8 @@ impl StrengthLevel {
         }
     }
 
-    // Weekly strenth recovery activities.  These replace the StrengthEmpty from the Yoga recovery schedule.  
-    // NotSet si using a schedule where all Strength days are skipped. This works on a 3 week cycle 
+    // Weekly strenth recovery activities.  These replace the StrengthEmpty from the Yoga recovery schedule.
+    // NotSet si using a schedule where all Strength days are skipped. This works on a 3 week cycle
     // with 2 strength activities per week.
     pub fn recovery(&self) -> [[ActivityType; 2]; 3] {
         match *self {

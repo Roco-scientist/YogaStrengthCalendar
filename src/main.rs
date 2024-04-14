@@ -2,9 +2,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
 use anyhow::Result;
-use YogaStrengthCalendar::gui;
 use eframe::egui;
+use YogaStrengthCalendar::gui;
 
+#[cfg(not(target_arch = "wasm32"))]
 fn main() -> Result<()> {
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
 
@@ -13,10 +14,9 @@ fn main() -> Result<()> {
             .with_inner_size([400.0, 600.0])
             .with_min_inner_size([300.0, 220.0])
             .with_icon(
-                eframe::icon_data::from_png_bytes(&include_bytes!("../bike.png")[..])
-                    .unwrap(),
+                eframe::icon_data::from_png_bytes(&include_bytes!("../bike.png")[..]).unwrap(),
             ),
-            ..Default::default()
+        ..Default::default()
     };
     let _ = eframe::run_native(
         "Yoga and strength for cycling",
@@ -39,7 +39,7 @@ fn main() {
             .start(
                 "the_canvas_id", // hardcode it
                 web_options,
-                Box::new(|cc| Box::new(gui::StrengthYogaApp::default())),
+                Box::new(|_cc| Box::new(gui::StrengthYogaApp::default())),
             )
             .await
             .expect("failed to start eframe");

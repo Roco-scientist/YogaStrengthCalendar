@@ -2,7 +2,7 @@ use crate::activities;
 use anyhow::Result;
 use chrono::{Datelike, Duration, NaiveDate, Weekday};
 use icalendar::{Calendar, Component, Event, EventLike};
-use std::{fs, path::PathBuf};
+use std::fs;
 
 /// Creates and saves the icalendar file with the input choices from the GUI
 pub fn create_ics(
@@ -10,7 +10,6 @@ pub fn create_ics(
     weeks: u32,
     recovery_weeks: Vec<NaiveDate>,
     mut weekly_activities: activities::WeeklyActivities,
-    destination: PathBuf,
 ) -> Result<()> {
     // Create  a new calendar to place events into
     let mut calendar = Calendar::new();
@@ -65,12 +64,24 @@ pub fn create_ics(
         // Make sure the next week starts on a Monday
         current_date = monday(current_date, MondayType::Next);
     }
-    save_ics(calendar, destination)?;
+    save_ics(calendar)?;
     Ok(())
 }
 
-fn save_ics(calendar: Calendar, destination: PathBuf) -> Result<()> {
-    fs::write(destination, format!("{}", calendar))?;
+#[cfg(not(target_arch = "wasm32"))]
+fn save_ics(calendar: Calendar) -> Result<()> {
+    if let Some(path) = rfd::FileDialog::new()
+        .set_file_name("workout.ics")
+        .save_file()
+    {
+        fs::write(path, format!("{}", calendar))?;
+    }
+    Ok(())
+}
+
+#[cfg(target_arch = "wasm32")]
+fn save_ics(calendar: Calendar) -> Result<()> {
+    fs::write("workout.ics", format!("{}", calendar))?;
     Ok(())
 }
 

@@ -52,13 +52,12 @@ impl eframe::App for StrengthYogaApp {
     // The GUI
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-
             // Yoga level area
             ui.label("Yoga Level:");
             ui.add_space(5.);
             ui.horizontal(|ui| {
-                egui::ComboBox::from_id_source("Yoga") 
-                    .selected_text(self.weekly_activities.yoga_level.to_string()) 
+                egui::ComboBox::from_id_source("Yoga")
+                    .selected_text(self.weekly_activities.yoga_level.to_string())
                     .show_ui(ui, |ui| {
                         for yoga_level in [
                             activities::YogaLevel::NotSet,
@@ -86,8 +85,8 @@ impl eframe::App for StrengthYogaApp {
             ui.label("Strength Level:");
             ui.add_space(5.);
             ui.horizontal(|ui| {
-                egui::ComboBox::from_id_source("Strength") 
-                    .selected_text(self.weekly_activities.strength_level.to_string()) 
+                egui::ComboBox::from_id_source("Strength")
+                    .selected_text(self.weekly_activities.strength_level.to_string())
                     .show_ui(ui, |ui| {
                         for strength_level in [
                             activities::StrengthLevel::NotSet,
@@ -153,7 +152,8 @@ impl eframe::App for StrengthYogaApp {
                     .filter(|(_, d)| d >= &&monday_start) // Only include Mondays after the Start Date
                     .map(|(x, _)| x) // Keep only the indexes
                     .take(self.total_weeks as usize) // Take as many as there are weeks
-                    .step_by(4) // Take every 4th to create 4 columns later
+                    .step_by(4)
+                // Take every 4th to create 4 columns later
                 {
                     ui.horizontal(|ui| {
                         // Create 4 columns for the dates
@@ -179,26 +179,20 @@ impl eframe::App for StrengthYogaApp {
             ui.add_space(10.);
             if ui.button("Save").clicked() {
                 self.weekly_activities.update_activities(); // Update the yoga and strength activities as this has not been done yet
-                // Pick the save file then save the icalendar
-                if let Some(path) = rfd::FileDialog::new()
-                    .set_file_name("workout.ics")
-                    .save_file()
-                {
-                    // Create a recovery weeks vec to feed into the create_ics function
-                    let recovery_weeks = self
-                        .recovery_weeks
-                        .iter()
-                        .zip(&self.recovery_weeks_bools)
-                        .filter_map(|(d, b)| if *b { Some(*d) } else { None })
-                        .collect::<Vec<NaiveDate>>();
-                    let _ = calendar::create_ics(
-                        self.start_date,
-                        self.total_weeks,
-                        recovery_weeks,
-                        self.weekly_activities,
-                        path,
-                    );
-                }
+
+                // Create a recovery weeks vec to feed into the create_ics function
+                let recovery_weeks = self
+                    .recovery_weeks
+                    .iter()
+                    .zip(&self.recovery_weeks_bools)
+                    .filter_map(|(d, b)| if *b { Some(*d) } else { None })
+                    .collect::<Vec<NaiveDate>>();
+                let _ = calendar::create_ics(
+                    self.start_date,
+                    self.total_weeks,
+                    recovery_weeks,
+                    self.weekly_activities,
+                );
             }
         });
     }
