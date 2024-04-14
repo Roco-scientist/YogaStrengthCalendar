@@ -197,7 +197,6 @@ impl eframe::App for StrengthYogaApp {
                     recovery_weeks,
                     self.weekly_activities,
                 );
-
             };
 
             #[cfg(target_arch = "wasm32")]
@@ -217,14 +216,16 @@ impl eframe::App for StrengthYogaApp {
                         self.total_weeks,
                         recovery_weeks,
                         self.weekly_activities,
-                    ).unwrap();
+                    )
+                    .unwrap();
                 }
                 ui.label("Copy text below into a workout.ics file:");
-                egui::ScrollArea::vertical().id_source("ics_text_scroll").show(ui, |ui|{
-                    ui.text_edit_multiline(&mut self.calendar_string);
-                })
+                egui::ScrollArea::vertical()
+                    .id_source("ics_text_scroll")
+                    .show(ui, |ui| {
+                        ui.text_edit_multiline(&mut self.calendar_string);
+                    })
             });
-
         });
-    } 
+    }
 }

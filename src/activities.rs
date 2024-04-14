@@ -1,4 +1,7 @@
-use std::fmt;
+use lazy_static::lazy_static;
+use std::{collections::HashMap, fmt};
+
+use anyhow::{bail, Result};
 
 /// Holder for yoga and strength file names
 #[derive(Copy, Clone, Debug)]
@@ -791,38 +794,59 @@ impl StrengthLevel {
     }
 }
 
-// STRENGTH_ANNOTATION = {
-//     "Core Focus 01": "",
-//     "Core Focus 02": "",
-//     "Core Focus 03": "",
-//     "Core Focus 04": "Exercise band",
-//     "Full Body 01": "Empty drink bottle",
-//     "Full Body 02": "Empty drink bottle",
-//     "Full Body 05": "Filled drink bottle",
-//     "Full Body 06": "2 Filled drink bottles",
-//     "Full Body 07": "2 Filled drink bottles",
-//     "Full Body 08": "2 Filled drink bottles",
-//     "Full Body 09": "2 Filled drink bottles",
-//     "Full Body 10": "2 Filled drink bottles",
-//     "Full Body 11": "2 Filled drink bottles",
-//     "Full Body 12": "2 Filled drink bottles",
-//     "Full Body 13": "2 Filled drink bottles",
-//     "Full Body 15": "2 Filled drink bottles",
-//     "Full Body 16": "2 Filled drink bottles",
-//     "Full Body 17": "2 Filled drink bottles",
-//     "Lower Body Focus 01": "Chair",
-//     "Lower Body Focus 02": "Chair",
-//     "Lower Body Focus 03": "Filled drink bottle",
-//     "Lower Body Focus 04": "Chair, drink bottle, exercise band",
-//     "Posterior Chain Focus 01": "",
-//     "Posterior Chain Focus 02": "",
-//     "Posterior Chain Focus 03": "Stick, filled drink bottle",
-//     "Posterior Chain Focus 04": "Exercise band, filled drink bottle",
-//     "Posterior Chain Focus 05": "Exercise band",
-//     "Recovery Session A": "Empty drink bottle",
-//     "Recovery Session B": "",
-// }
-//
+lazy_static! {
+    static ref STRENGTH_HASH: HashMap<&'static str, &'static str> = HashMap::from([
+        ("Core Focus 01", ""),
+        ("Core Focus 02", ""),
+        ("Core Focus 03", ""),
+        ("Core Focus 04", "Exercise band"),
+        ("Full Body 01", "Empty drink bottle"),
+        ("Full Body 02", "Empty drink bottle"),
+        ("Full Body 05", "Filled drink bottle"),
+        ("Full Body 06", "2 Filled drink bottles"),
+        ("Full Body 07", "2 Filled drink bottles"),
+        ("Full Body 08", "2 Filled drink bottles"),
+        ("Full Body 09", "2 Filled drink bottles"),
+        ("Full Body 10", "2 Filled drink bottles"),
+        ("Full Body 11", "2 Filled drink bottles"),
+        ("Full Body 12", "2 Filled drink bottles"),
+        ("Full Body 13", "2 Filled drink bottles"),
+        ("Full Body 15", "2 Filled drink bottles"),
+        ("Full Body 16", "2 Filled drink bottles"),
+        ("Full Body 17", "2 Filled drink bottles"),
+        ("Lower Body Focus 01", "Chair"),
+        ("Lower Body Focus 02", "Chair"),
+        ("Lower Body Focus 03", "Filled drink bottle"),
+        ("Lower Body Focus 04", "Chair, drink bottle, exercise band"),
+        ("Posterior Chain Focus 01", ""),
+        ("Posterior Chain Focus 02", ""),
+        ("Posterior Chain Focus 03", "Stick, filled drink bottle"),
+        (
+            "Posterior Chain Focus 04",
+            "Exercise band, filled drink bottle"
+        ),
+        ("Posterior Chain Focus 05", "Exercise band"),
+        ("Recovery Session A", "Empty drink bottle"),
+        ("Recovery Session B", ""),
+    ]);
+}
+
+fn strength_added_info(strength: ActivityType) -> Result<String> {
+    match strength {
+        ActivityType::Strength(strength_text) => {
+            if let Some(added_info) = STRENGTH_HASH.get(strength_text) {
+                Ok(added_info.to_string())
+            } else {
+                bail!("Strength activity not in hashmap. Activity: {:?}", strength)
+            }
+        }
+        _ => bail!(
+            "Sent a non-strength activity to strength function.  Activity: {:?}",
+            strength
+        ),
+    }
+}
+
 pub enum WeekType {
     Active,
     Recovery,
