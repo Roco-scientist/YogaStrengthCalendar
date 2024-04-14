@@ -10,6 +10,7 @@ pub struct StrengthYogaApp {
     start_date: NaiveDate,
     recovery_weeks_bools: Vec<bool>,
     recovery_weeks: Vec<NaiveDate>,
+    calendar_string: String,
 }
 
 impl Default for StrengthYogaApp {
@@ -20,6 +21,7 @@ impl Default for StrengthYogaApp {
             start_date: Local::now().date_naive(), // when the workout schedule starts
             recovery_weeks_bools: std::iter::repeat(false).take(120).collect::<Vec<bool>>(), // list of bools for changing workout week selection
             recovery_weeks: calendar::recovery_days(Local::now().date_naive(), 120), // list of mondays for workout weeks
+            calendar_string: String::default(),
         }
     }
 }
@@ -50,7 +52,7 @@ impl StrengthYogaApp {
 
 impl eframe::App for StrengthYogaApp {
     // The GUI
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) -> () {
         egui::CentralPanel::default().show(ctx, |ui| {
             // Yoga level area
             ui.label("Yoga Level:");
@@ -177,6 +179,8 @@ impl eframe::App for StrengthYogaApp {
 
             // Save icalendar area
             ui.add_space(10.);
+
+            #[cfg(not(target_arch = "wasm32"))]
             if ui.button("Save").clicked() {
                 self.weekly_activities.update_activities(); // Update the yoga and strength activities as this has not been done yet
 
@@ -193,7 +197,34 @@ impl eframe::App for StrengthYogaApp {
                     recovery_weeks,
                     self.weekly_activities,
                 );
-            }
+
+            };
+
+            #[cfg(target_arch = "wasm32")]
+            ui.vertical(|ui| {
+                if ui.button("Update text").clicked() {
+                    self.weekly_activities.update_activities(); // Update the yoga and strength activities as this has not been done yet
+
+                    // Create a recovery weeks vec to feed into the create_ics function
+                    let recovery_weeks = self
+                        .recovery_weeks
+                        .iter()
+                        .zip(&self.recovery_weeks_bools)
+                        .filter_map(|(d, b)| if *b { Some(*d) } else { None })
+                        .collect::<Vec<NaiveDate>>();
+                    self.calendar_string = calendar::create_ics(
+                        self.start_date,
+                        self.total_weeks,
+                        recovery_weeks,
+                        self.weekly_activities,
+                    ).unwrap();
+                }
+                ui.label("Copy text below into a workout.ics file:");
+                egui::ScrollArea::vertical().id_source("ics_text_scroll").show(ui, |ui|{
+                    ui.text_edit_multiline(&mut self.calendar_string);
+                })
+            });
+
         });
-    }
+    } 
 }

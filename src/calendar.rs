@@ -10,7 +10,7 @@ pub fn create_ics(
     weeks: u32,
     recovery_weeks: Vec<NaiveDate>,
     mut weekly_activities: activities::WeeklyActivities,
-) -> Result<()> {
+) -> Result<String> {
     // Create  a new calendar to place events into
     let mut calendar = Calendar::new();
 
@@ -64,26 +64,31 @@ pub fn create_ics(
         // Make sure the next week starts on a Monday
         current_date = monday(current_date, MondayType::Next);
     }
-    save_ics(calendar)?;
-    Ok(())
+
+    let calendar_text = format!("{}", calendar);
+
+    #[cfg(not(target_arch = "wasm32"))]
+    save_ics(calendar_text.clone())?;
+
+    Ok(calendar_text)
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-fn save_ics(calendar: Calendar) -> Result<()> {
+fn save_ics(calendar_text: String) -> Result<()> {
     if let Some(path) = rfd::FileDialog::new()
         .set_file_name("workout.ics")
         .save_file()
     {
-        fs::write(path, format!("{}", calendar))?;
+        fs::write(path, calendar_text)?;
     }
     Ok(())
 }
 
-#[cfg(target_arch = "wasm32")]
-fn save_ics(calendar: Calendar) -> Result<()> {
-    fs::write("workout.ics", format!("{}", calendar))?;
-    Ok(())
-}
+// #[cfg(target_arch = "wasm32")]
+// fn save_ics(calendar: Calendar) -> Result<()> {
+//     fs::write("workout.ics", format!("{}", calendar))?;
+//     Ok(())
+// }
 
 // Used to determine if the monday() function advances to the next monday or goes to the previous
 // monday

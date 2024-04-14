@@ -1,12 +1,13 @@
 #![warn(clippy::all, rust_2018_idioms)]
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
-use anyhow::Result;
+#[cfg(not(target_arch = "wasm32"))]
 use eframe::egui;
+
 use YogaStrengthCalendar::gui;
 
 #[cfg(not(target_arch = "wasm32"))]
-fn main() -> Result<()> {
+fn main() {
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
 
     let native_options = eframe::NativeOptions {
@@ -23,7 +24,6 @@ fn main() -> Result<()> {
         native_options,
         Box::new(|_cc| Box::new(gui::StrengthYogaApp::default())),
     );
-    Ok(())
 }
 
 // When compiling to web using trunk:
