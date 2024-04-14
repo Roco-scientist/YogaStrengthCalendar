@@ -49,8 +49,10 @@ impl StrengthYogaApp {
 impl eframe::App for StrengthYogaApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
+            ui.label("Yoga Level:");
+            ui.add_space(5.);
             ui.horizontal(|ui| {
-                egui::ComboBox::from_label("Yoga Level") // When created from a label the text will b shown on the side of the combobox
+                egui::ComboBox::from_id_source("Yoga") // When created from a label the text will b shown on the side of the combobox
                     .selected_text(self.weekly_activities.yoga_level.to_string()) // This is the currently selected option (in text form)
                     .show_ui(ui, |ui| {
                         // In this closure the various options can be added
@@ -72,11 +74,15 @@ impl eframe::App for StrengthYogaApp {
                     "Progress when done",
                 );
             });
+            ui.add_space(10.);
+            ui.separator();
 
-            ui.add_space(16.);
+            ui.add_space(10.);
+            ui.label("Strength Level:");
+            ui.add_space(5.);
 
             ui.horizontal(|ui| {
-                egui::ComboBox::from_label("Strength Level") // When created from a label the text will b shown on the side of the combobox
+                egui::ComboBox::from_id_source("Strength") // When created from a label the text will b shown on the side of the combobox
                     .selected_text(self.weekly_activities.strength_level.to_string()) // This is the currently selected option (in text form)
                     .show_ui(ui, |ui| {
                         // In this closure the various options can be added
@@ -100,21 +106,29 @@ impl eframe::App for StrengthYogaApp {
                     "Progress when done",
                 );
             });
+            ui.add_space(10.);
+            ui.separator();
 
-            ui.add_space(16.);
+            ui.add_space(10.);
 
-            ui.add(egui::Slider::new(&mut self.total_weeks, 1..=52).text("Total weeks"));
+            ui.label("Total Weeks:");
+            ui.add_space(5.);
+            ui.add(egui::Slider::new(&mut self.total_weeks, 1..=52));
+            ui.add_space(10.);
+            ui.separator();
 
-            ui.add_space(16.);
+            ui.add_space(10.);
 
-            ui.label("Start date:");
-            ui.add_space(6.);
+            ui.label("Start Date:");
+            ui.add_space(5.);
             ui.add(DatePickerButton::new(&mut self.start_date));
+            ui.add_space(10.);
+            ui.separator();
 
-            ui.add_space(16.);
+            ui.add_space(10.);
 
             ui.horizontal(|ui| {
-                ui.label("Select recovery weeks:");
+                ui.label("Recovery Weeks:");
                 if ui.button("3:1").clicked() {
                     self.set_recovery_bool_repeat(4)
                 }
@@ -126,9 +140,8 @@ impl eframe::App for StrengthYogaApp {
                 }
             });
 
-            ui.add_space(6.);
+            ui.add_space(5.);
 
-            ui.separator();
             ui.vertical(|ui| {
                 let last_monday = calendar::last_monday(self.start_date, self.total_weeks);
                 let monday_start = calendar::monday_start(self.start_date);
@@ -155,9 +168,10 @@ impl eframe::App for StrengthYogaApp {
                     });
                 }
             });
-
+            ui.add_space(10.);
             ui.separator();
-            ui.add_space(16.);
+
+            ui.add_space(10.);
             if ui.button("Save").clicked() {
                 self.weekly_activities.update_activities();
                 if let Some(path) = rfd::FileDialog::new()
