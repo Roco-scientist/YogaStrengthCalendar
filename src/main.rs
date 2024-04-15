@@ -4,7 +4,8 @@
 #[cfg(not(target_arch = "wasm32"))]
 use eframe::egui;
 
-use YogaStrengthCalendar::gui::StrengthYogaApp;
+// #[allow(non_snake_case)]
+use yoga_strength_calendar::gui::StrengthYogaApp;
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {

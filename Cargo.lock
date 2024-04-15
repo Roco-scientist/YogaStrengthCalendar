@@ -3,26 +3,6 @@
 version = 3
 
 [[package]]
-name = "YogaStrengthCalendar"
-version = "0.2.0"
-dependencies = [
- "anyhow",
- "chrono",
- "eframe",
- "egui",
- "egui_extras",
- "env_logger",
- "futures",
- "icalendar",
- "lazy_static",
- "log",
- "rfd",
- "serde",
- "tracing-subscriber",
- "wasm-bindgen-futures",
-]
-
-[[package]]
 name = "ab_glyph"
 version = "0.2.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3634,6 +3614,26 @@ name = "xml-rs"
 version = "0.8.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "791978798f0597cfc70478424c2b4fdc2b7a8024aaff78497ef00f24ef674193"
+
+[[package]]
+name = "yoga-strength-calendar"
+version = "0.2.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "eframe",
+ "egui",
+ "egui_extras",
+ "env_logger",
+ "futures",
+ "icalendar",
+ "lazy_static",
+ "log",
+ "rfd",
+ "serde",
+ "tracing-subscriber",
+ "wasm-bindgen-futures",
+]
 
 [[package]]
 name = "zbus"
