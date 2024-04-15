@@ -9,7 +9,7 @@ with workout.tk.py being the GUI version.  For Rust, compile with `cargo build -
 
 ## Use
 ### Rust  
-`./target/release/YogaStrengthCalendar`  
+`./target/release/yoga-strength-calendar`  
   
 
 ![App picture](./app.png)
