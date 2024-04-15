@@ -205,8 +205,6 @@ impl eframe::App for StrengthYogaApp {
             #[cfg(target_arch = "wasm32")]
             ui.vertical(|ui| {
                 if ui.button("Update text").clicked() {
-                    self.weekly_activities.update_activities(); // Update the yoga and strength activities as this has not been done yet
-
                     // Create a recovery weeks vec to feed into the create_ics function
                     let recovery_weeks = self
                         .recovery_weeks
