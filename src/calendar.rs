@@ -1,10 +1,9 @@
 use crate::activities;
-use anyhow::Result;
 use chrono::{Datelike, Duration, NaiveDate, Weekday};
 use icalendar::{Calendar, Component, Event, EventLike};
+use std::future::Future;
+use anyhow::Result;
 
-#[cfg(not(target_arch = "wasm32"))]
-use std::fs;
 
 /// Creates and saves the icalendar file with the input choices from the GUI
 pub fn create_ics(
@@ -12,7 +11,7 @@ pub fn create_ics(
     weeks: u32,
     recovery_weeks: Vec<NaiveDate>,
     mut weekly_activities: activities::WeeklyActivities,
-) -> Result<String> {
+) -> Result<()>{
     // Create  a new calendar to place events into
     let mut calendar = Calendar::new();
 
@@ -67,33 +66,37 @@ pub fn create_ics(
         // Make sure the next week starts on a Monday
         current_date = monday(current_date, MondayType::Next);
     }
-
-    println!("To save 5");
     let calendar_text = format!("{}", calendar);
 
-    #[cfg(not(target_arch = "wasm32"))]
-    save_ics(calendar_text.clone())?;
-
-    Ok(calendar_text)
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-fn save_ics(calendar_text: String) -> Result<()> {
-    println!("In save");
-    if let Some(path) = rfd::FileDialog::new()
-        .set_file_name("workout.ics")
-        .save_file()
-    {
-        fs::write(path, calendar_text)?;
-    }
+    save_ics(calendar_text.clone());
     Ok(())
 }
 
-// #[cfg(target_arch = "wasm32")]
-// fn save_ics(calendar: Calendar) -> Result<()> {
-//     fs::write("workout.ics", format!("{}", calendar))?;
-//     Ok(())
-// }
+fn save_ics(calendar_text: String) {
+    #[cfg(not(target_arch = "wasm32"))]
+    let task = rfd::AsyncFileDialog::new().set_file_name("workout.ics").save_file();
+
+    #[cfg(target_arch = "wasm32")]
+    let task = rfd::AsyncFileDialog::new().save_file();
+
+    execute(async move {
+        let file = task.await;
+        if let Some(file) = file {
+            _ = file.write(calendar_text.as_bytes()).await;
+        }
+    });
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn execute<F: Future<Output = ()> + Send + 'static>(f: F) {
+    // this is stupid... use any executor of your choice instead
+    std::thread::spawn(move || futures::executor::block_on(f));
+}
+
+#[cfg(target_arch = "wasm32")]
+fn execute<F: Future<Output = ()> + 'static>(f: F) {
+    wasm_bindgen_futures::spawn_local(f);
+}
 
 // Used to determine if the monday() function advances to the next monday or goes to the previous
 // monday
