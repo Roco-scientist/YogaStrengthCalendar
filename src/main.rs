@@ -4,7 +4,8 @@
 #[cfg(not(target_arch = "wasm32"))]
 use eframe::egui;
 
-use YogaStrengthCalendar::gui::StrengthYogaApp;
+// #[allow(non_snake_case)]
+use yoga_strength_calendar::gui::StrengthYogaApp;
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {
@@ -12,8 +13,8 @@ fn main() {
 
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([400.0, 600.0])
-            .with_min_inner_size([300.0, 220.0])
+            .with_inner_size([360.0, 800.0])
+            .with_min_inner_size([360.0, 220.0])
             .with_icon(
                 eframe::icon_data::from_png_bytes(&include_bytes!("../bike.png")[..]).unwrap(),
             ),

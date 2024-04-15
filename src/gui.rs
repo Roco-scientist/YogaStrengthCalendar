@@ -10,9 +10,6 @@ pub struct StrengthYogaApp {
     start_date: NaiveDate,
     recovery_weeks_bools: Vec<bool>,
     recovery_weeks: Vec<NaiveDate>,
-
-    #[cfg(target_arch = "wasm32")]
-    calendar_string: String,
 }
 
 impl Default for StrengthYogaApp {
@@ -23,9 +20,6 @@ impl Default for StrengthYogaApp {
             start_date: Local::now().date_naive(), // when the workout schedule starts
             recovery_weeks_bools: std::iter::repeat(false).take(120).collect::<Vec<bool>>(), // list of bools for changing workout week selection
             recovery_weeks: calendar::recovery_days(Local::now().date_naive(), 120), // list of mondays for workout weeks
-
-            #[cfg(target_arch = "wasm32")]
-            calendar_string: String::default(),
         }
     }
 }
@@ -184,7 +178,6 @@ impl eframe::App for StrengthYogaApp {
             // Save icalendar area
             ui.add_space(10.);
 
-            #[cfg(not(target_arch = "wasm32"))]
             if ui.button("Save").clicked() {
                 // Create a recovery weeks vec to feed into the create_ics function
                 let recovery_weeks = self
@@ -203,30 +196,8 @@ impl eframe::App for StrengthYogaApp {
             };
 
             #[cfg(target_arch = "wasm32")]
-            ui.vertical(|ui| {
-                if ui.button("Update text").clicked() {
-                    // Create a recovery weeks vec to feed into the create_ics function
-                    let recovery_weeks = self
-                        .recovery_weeks
-                        .iter()
-                        .zip(&self.recovery_weeks_bools)
-                        .filter_map(|(d, b)| if *b { Some(*d) } else { None })
-                        .collect::<Vec<NaiveDate>>();
-                    self.calendar_string = calendar::create_ics(
-                        self.start_date,
-                        self.total_weeks,
-                        recovery_weeks,
-                        self.weekly_activities,
-                    )
-                    .unwrap();
-                }
-                ui.label("Copy text below into a workout.ics file:");
-                egui::ScrollArea::vertical()
-                    .id_source("ics_text_scroll")
-                    .show(ui, |ui| {
-                        ui.text_edit_multiline(&mut self.calendar_string);
-                    })
-            });
+            ui.label("Rename saved file to 'workout.ics' to allow calendar import")
+
         });
     }
 }
