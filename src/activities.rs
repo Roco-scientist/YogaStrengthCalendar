@@ -4,7 +4,7 @@ use std::{collections::HashMap, fmt};
 use anyhow::{bail, Result};
 
 /// Holder for yoga and strength file names
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, serde::Deserialize, serde::Serialize)]
 pub enum ActivityType {
     Yoga(&'static str),
     Strength(&'static str),
@@ -13,7 +13,7 @@ pub enum ActivityType {
 }
 
 /// Level for Yoga. Selected throughout the app to set video selection.
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, serde::Deserialize, serde::Serialize)]
 pub enum YogaLevel {
     NotSet, // Defeault level before setting
     Beginer,
@@ -758,7 +758,7 @@ const STRENGTHWEEKSRECOVERY: [[[ActivityType; 2]; 3]; 6] = [
     ],
 ];
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq, serde::Deserialize, serde::Serialize)]
 pub enum StrengthLevel {
     NotSet, // Default setting before a level is selected
     Strength1,
@@ -879,7 +879,7 @@ pub enum WeekType {
 
 /// The main holder of information used to create the icalendar.  This struct is used and changed by
 /// the GUI.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, serde::Deserialize, serde::Serialize)]
 pub struct WeeklyActivities {
     pub yoga_level: YogaLevel,
     pub progress_yoga: bool, // whether or not to progress the yoga level after completing the 9 week cycle
@@ -961,9 +961,11 @@ impl WeeklyActivities {
             self.week_index = 0;
             if self.progress_yoga {
                 self.yoga_level.advance();
+                self.recovery_index = 0;
             }
             if self.progress_strength {
                 self.strength_level.advance();
+                self.recovery_index = 0;
             }
         }
     }
@@ -994,5 +996,10 @@ impl WeeklyActivities {
             }
         }
         weeks_activities
+    }
+
+    pub fn reset_week_indexes(&mut self) {
+        self.week_index = 0;
+        self.recovery_index = 0;
     }
 }

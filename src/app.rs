@@ -4,10 +4,18 @@ use chrono::{Local, NaiveDate};
 use eframe::egui;
 use egui_extras::DatePickerButton;
 
+
+#[derive(PartialEq, serde::Deserialize, serde::Serialize)]
+enum WorkoutStart {
+    Week1,
+    Continue,
+}
+
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
 pub struct StrengthYogaApp {
     weekly_activities: activities::WeeklyActivities,
+    workout_week_start: WorkoutStart,
     #[serde(skip)] 
     total_weeks: u32,
     #[serde(skip)] 
@@ -23,6 +31,7 @@ impl Default for StrengthYogaApp {
         Self {
             weekly_activities: activities::WeeklyActivities::default(),
             total_weeks: 12, // total number of weeks to create a schedule for
+            workout_week_start: WorkoutStart::Continue,
             start_date: Local::now().date_naive(), // when the workout schedule starts
             recovery_weeks_bools: std::iter::repeat(false).take(120).collect::<Vec<bool>>(), // list of bools for changing workout week selection
             recovery_weeks: calendar::recovery_days(Local::now().date_naive(), 120), // list of mondays for workout weeks
@@ -147,6 +156,16 @@ impl eframe::App for StrengthYogaApp {
             ui.add_space(10.);
             ui.separator();
 
+            ui.add_space(10.);
+            ui.label("Workouts have a 9 week rotation.  Start from:");
+            ui.add_space(5.);
+            ui.horizontal(|ui| {
+                ui.selectable_value(&mut self.workout_week_start, WorkoutStart::Continue, "Continue from last session");
+                ui.selectable_value(&mut self.workout_week_start, WorkoutStart::Week1, "Restart at week 1 of rotation");
+            });
+            ui.add_space(10.);
+            ui.separator();
+
             // Total weeks selection
             ui.add_space(10.);
             ui.label("Total Weeks:");
@@ -215,6 +234,9 @@ impl eframe::App for StrengthYogaApp {
             ui.add_space(10.);
 
             if ui.button("Save").clicked() {
+                if self.workout_week_start == WorkoutStart::Week1 {
+                    self.weekly_activities.reset_week_indexes();
+                }
                 // Create a recovery weeks vec to feed into the create_ics function
                 let recovery_weeks = self
                     .recovery_weeks
