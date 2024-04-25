@@ -4,11 +4,17 @@ use chrono::{Local, NaiveDate};
 use eframe::egui;
 use egui_extras::DatePickerButton;
 
+#[derive(serde::Deserialize, serde::Serialize)]
+#[serde(default)] // if we add new fields, give them default values when deserializing old state
 pub struct StrengthYogaApp {
     weekly_activities: activities::WeeklyActivities,
+    #[serde(skip)] 
     total_weeks: u32,
+    #[serde(skip)] 
     start_date: NaiveDate,
+    #[serde(skip)] 
     recovery_weeks_bools: Vec<bool>,
+    #[serde(skip)] 
     recovery_weeks: Vec<NaiveDate>,
 }
 
@@ -46,9 +52,20 @@ impl StrengthYogaApp {
             self.recovery_weeks_bools[x - 1] = true
         }
     }
+    pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
+        // Load previous app state (if any).
+        if let Some(storage) = cc.storage {
+            return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
+        }
+
+        Default::default()
+    }
 }
 
 impl eframe::App for StrengthYogaApp {
+    fn save(&mut self, storage: &mut dyn eframe::Storage) {
+        eframe::set_value(storage, eframe::APP_KEY, self);
+    }
     // The GUI
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
