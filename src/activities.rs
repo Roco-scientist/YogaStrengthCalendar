@@ -932,6 +932,7 @@ impl WeeklyActivities {
 
     // Creates a 6 day week of activities combining yoga and strength
     pub fn next_week_activities(&mut self, week_type: WeekType) -> Vec<ActivityType> {
+        println!("{}", self.week_index);
         let week_activities;
         match week_type {
             WeekType::Active => {
