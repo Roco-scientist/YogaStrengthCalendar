@@ -1,4 +1,4 @@
-use crate::activities;
+use crate::activities::{self, WeeklyActivities};
 use chrono::{Datelike, Duration, NaiveDate, Weekday};
 use icalendar::{Calendar, Component, Event, EventLike};
 use std::future::Future;
@@ -10,8 +10,8 @@ pub fn create_ics(
     start: NaiveDate,
     weeks: u32,
     recovery_weeks: Vec<NaiveDate>,
-    mut weekly_activities: activities::WeeklyActivities,
-) -> Result<()>{
+    mut weekly_activities: WeeklyActivities,
+) -> Result<WeeklyActivities>{
     // Create  a new calendar to place events into
     let mut calendar = Calendar::new();
 
@@ -69,7 +69,7 @@ pub fn create_ics(
     let calendar_text = format!("{}", calendar);
 
     save_ics(calendar_text.clone());
-    Ok(())
+    Ok(weekly_activities)
 }
 
 fn save_ics(calendar_text: String) {

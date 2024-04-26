@@ -2,4 +2,4 @@
 
 pub mod activities;
 pub mod calendar;
-pub mod gui;
+pub mod app;

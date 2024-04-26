@@ -1,11 +1,8 @@
 #![warn(clippy::all, rust_2018_idioms)]
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
-#[cfg(not(target_arch = "wasm32"))]
-use eframe::egui;
-
 // #[allow(non_snake_case)]
-use yoga_strength_calendar::gui::StrengthYogaApp;
+use yoga_strength_calendar::app::StrengthYogaApp;
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {
@@ -13,8 +10,8 @@ fn main() {
 
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([360.0, 800.0])
-            .with_min_inner_size([360.0, 220.0])
+            .with_inner_size([370.0, 800.0])
+            .with_min_inner_size([370.0, 220.0])
             .with_icon(
                 eframe::icon_data::from_png_bytes(&include_bytes!("../bike.png")[..]).unwrap(),
             ),
@@ -23,7 +20,7 @@ fn main() {
     let _ = eframe::run_native(
         "Yoga and strength for cycling",
         native_options,
-        Box::new(|_cc| Box::<StrengthYogaApp>::default()),
+        Box::new(|cc| Box::new(StrengthYogaApp::new(cc))),
     );
 }
 
@@ -40,7 +37,7 @@ fn main() {
             .start(
                 "the_canvas_id", // hardcode it
                 web_options,
-                Box::new(|_cc| Box::<StrengthYogaApp>::default()),
+                Box::new(|cc| Box::new(StrengthYogaApp::new(cc))),
             )
             .await
             .expect("failed to start eframe");
