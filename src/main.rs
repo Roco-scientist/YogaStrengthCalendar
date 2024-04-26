@@ -20,7 +20,7 @@ fn main() {
     let _ = eframe::run_native(
         "Yoga and strength for cycling",
         native_options,
-        Box::new(|_cc| Box::<StrengthYogaApp>::default()),
+        Box::new(|cc| Box::new(StrengthYogaApp::new(cc))),
     );
 }
 
@@ -37,7 +37,7 @@ fn main() {
             .start(
                 "the_canvas_id", // hardcode it
                 web_options,
-                Box::new(|_cc| Box::<StrengthYogaApp>::default()),
+                Box::new(|cc| Box::new(StrengthYogaApp::new(cc))),
             )
             .await
             .expect("failed to start eframe");
