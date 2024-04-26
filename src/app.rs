@@ -244,7 +244,7 @@ impl eframe::App for StrengthYogaApp {
                     .zip(&self.recovery_weeks_bools)
                     .filter_map(|(d, b)| if *b { Some(*d) } else { None })
                     .collect::<Vec<NaiveDate>>();
-                let _ = calendar::create_ics(
+                self.weekly_activities = calendar::create_ics(
                     self.start_date,
                     self.total_weeks,
                     recovery_weeks,
